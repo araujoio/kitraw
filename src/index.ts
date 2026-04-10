@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { init } from './commands/init';
+import { init } from '@/commands/init';
 
 async function main() {
   const program = new Command();
