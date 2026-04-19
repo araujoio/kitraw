@@ -81,7 +81,7 @@ export class FileSystem {
     this.validatePath(path, "Path");
 
     try {
-      await this.fsLib.writeJson(path, content);
+      await this.fsLib.writeJson(path, content, { spaces: 2 });
     } catch (error) {
       throw new Error("Failed to write JSON file:", { cause: error });
     }
