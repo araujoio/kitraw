@@ -19,11 +19,15 @@ export class FileSystem {
     }
   }
 
-  async writeFile(path: string, content: string): Promise<void> {
+  async writeFile(path: string, content?: string): Promise<void> {
     this.validatePath(path, "Path");
 
     try {
-      await this.fsLib.writeFile(path, content, "utf-8");
+      if (content) {
+        await this.fsLib.outputFile(path, content, "utf-8");
+      } else {
+        await this.fsLib.ensureFile(path);
+      }
     } catch (error) {
       throw new Error("Failed to write file:", { cause: error });
     }
@@ -81,7 +85,7 @@ export class FileSystem {
     this.validatePath(path, "Path");
 
     try {
-      await this.fsLib.writeJson(path, content, { spaces: 2 });
+      await this.fsLib.outputJson(path, content, { spaces: 2 });
     } catch (error) {
       throw new Error("Failed to write JSON file:", { cause: error });
     }
