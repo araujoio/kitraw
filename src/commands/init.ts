@@ -17,7 +17,7 @@ export const init = new Command("init")
       if (err instanceof Error) {
         console.error(chalk.red(err.message));
       } else {
-        console.error(chalk.red("Unexpected error ocurred:"), err);
+        console.error(chalk.red("Unexpected error occurred:"), err);
       }
       process.exit(1);
     }
