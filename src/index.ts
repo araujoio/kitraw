@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import { init } from "@/commands/init";
+import { add } from "@/commands/add";
 
 async function main() {
   const program = new Command();
@@ -9,7 +10,9 @@ async function main() {
     .description("a modern generator for nextjs projects")
     .version("1.0.0");
 
-  program.addCommand(init);
+  program
+    .addCommand(init)
+    .addCommand(add);
 
   program.parse();
 }
