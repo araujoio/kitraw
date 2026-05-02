@@ -6,23 +6,24 @@ export class PageService {
   private fileSystem: FileSystem = new FileSystem();
 
   async createPage(name: string, isPrivate: boolean): Promise<void> {
-    let pagePath: string;
-
-    if (isPrivate) {
-      pagePath = path.join(process.cwd(), "src", "app", "[locale]", "(private)", name);
-    } else {
-      pagePath = path.join(process.cwd(), "src", "app", "[locale]", "(public)", name);
-    }
+    const group: string = isPrivate ? "private" : "public";
+    const pagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, name);
+    const groupLayoutPath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, "layout.tsx");
 
     const folderExists: boolean = await this.fileSystem.exists(pagePath);
 
     if (folderExists) {
       throw new Error(`Folder ${name} already exists`);
     } else {
-      await this.fileSystem.writeFile(
-        path.join(pagePath, "page.tsx"),
-        this.pageTemplate(name)
-      );
+      await this.fileSystem.writeFile(path.join(pagePath, "page.tsx"), this.pageTemplate(name));
+      const groupLayoutExists: boolean = await this.fileSystem.exists(groupLayoutPath);
+      if (!groupLayoutExists) {
+        if (group === "public") {
+          await this.fileSystem.writeFile(groupLayoutPath, this.publicLayoutTemplate());
+        } else {
+          await this.fileSystem.writeFile(groupLayoutPath, this.privateLayoutTemplate());
+        }
+      }
     }
   }
 
@@ -33,12 +34,31 @@ export class PageService {
       .join("");
 
     return dedent`
-
       export default function ${capitalizedName}Page() {
         return (
           <div>
             <h1>${capitalizedName}</h1>
           </div>
+        );
+      }
+    `;
+  }
+
+  private publicLayoutTemplate(): string {
+    return dedent`
+      export default function PublicLayout({children}: {children: React.ReactNode}) {
+        return (
+          {children}
+        );
+      }
+    `;
+  }
+
+  private privateLayoutTemplate(): string {
+    return dedent`
+      export default function PrivateLayout({children}: {children: React.ReactNode}) {
+        return (
+          {children}
         );
       }
     `;
