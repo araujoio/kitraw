@@ -5,11 +5,9 @@ import { dedent } from "@/utils/dedent";
 export class PageService {
   private fileSystem: FileSystem = new FileSystem();
 
-  async createPage(name: string, isPrivate: boolean): Promise<void> {
+  async createPage(name: Array<string>, isPrivate: boolean): Promise<void> {
     const group: string = isPrivate ? "private" : "public";
-    const pagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, name);
     const groupLayoutPath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, "layout.tsx");
-    const folderExists: boolean = await this.fileSystem.exists(pagePath);
     const kitrawPath: string = path.join(process.cwd(), "kitraw.json");
     const kitrawExists: boolean = await this.fileSystem.exists(kitrawPath);
     const kitrawConfig: any = await this.fileSystem.readJson(kitrawPath);
@@ -18,49 +16,54 @@ export class PageService {
       throw new Error(`File ${kitrawPath} does not exist`);
     }
 
-    if (folderExists) {
-      throw new Error(`Folder ${name} already exists`);
-    } else {
-      await this.fileSystem.writeFile(path.join(pagePath, "page.tsx"), this.pageTemplate(name));
+    for (const pageName of name) {
+      const pagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, pageName);
+      const folderExists: boolean = await this.fileSystem.exists(pagePath);
 
-      kitrawConfig["routes"][group + "Routes"].push(name);
+      if (folderExists) {
+        continue;
+      } else {
+        await this.fileSystem.writeFile(path.join(pagePath, "page.tsx"), this.pageTemplate(pageName));
 
-      await this.fileSystem.writeJson(kitrawPath, kitrawConfig);
+        kitrawConfig["routes"][group + "Routes"].push(pageName);
+      }
+    }
 
-      const groupLayoutExists: boolean = await this.fileSystem.exists(groupLayoutPath);
-      if (!groupLayoutExists) {
-        if (group === "public") {
-          await this.fileSystem.writeFile(groupLayoutPath, this.publicLayoutTemplate());
-        } else {
-          await this.fileSystem.writeFile(groupLayoutPath, this.privateLayoutTemplate());
-        }
+    await this.fileSystem.writeJson(kitrawPath, kitrawConfig);
+    const groupLayoutExists: boolean = await this.fileSystem.exists(groupLayoutPath);
+    if (!groupLayoutExists) {
+      if (group === "public") {
+        await this.fileSystem.writeFile(groupLayoutPath, this.publicLayoutTemplate());
+      } else {
+        await this.fileSystem.writeFile(groupLayoutPath, this.privateLayoutTemplate());
       }
     }
   }
 
-  async deletePage(name: string, isPrivate: boolean): Promise<void> {
+  async deletePage(name: Array<string>, isPrivate: boolean): Promise<void> {
     const group: string = isPrivate ? "private" : "public";
-    const pagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, name);
-    const folderExists: boolean = await this.fileSystem.exists(pagePath);
     const kitrawPath: string = path.join(process.cwd(), "kitraw.json");
     const kitrawExists: boolean = await this.fileSystem.exists(kitrawPath);
     const kitrawConfig: any = await this.fileSystem.readJson(kitrawPath);
-    
+
     if (!kitrawExists) {
       throw new Error(`File ${kitrawPath} does not exist`);
     }
 
-    if (folderExists) {
-      await this.fileSystem.remove(pagePath);
+    for (const pageName of name) {
+      const pagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, pageName);
+      const folderExists: boolean = await this.fileSystem.exists(pagePath);
 
-      const routes: Array<string> = kitrawConfig["routes"][group + "Routes"];
-      const newRoutes: Array<string> = routes.filter((route: string) => route !== name);
-      kitrawConfig["routes"][group + "Routes"] = newRoutes;
+      if (folderExists) {
+        await this.fileSystem.remove(pagePath);
 
-      await this.fileSystem.writeJson(kitrawPath, kitrawConfig);
-    } else {
-      throw new Error(`Folder ${name} does not exist`);
+        const routes: Array<string> = kitrawConfig["routes"][group + "Routes"];
+        const newRoutes: Array<string> = routes.filter((route: string) => route !== pageName);
+        kitrawConfig["routes"][group + "Routes"] = newRoutes;
+      }
     }
+
+    await this.fileSystem.writeJson(kitrawPath, kitrawConfig);
   }
 
   private pageTemplate(name: string): string {

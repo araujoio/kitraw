@@ -5,13 +5,13 @@ import chalk from "chalk";
 export const createPage = new Command("create-page")
   .name("create-page")
   .description("create a new page")
-  .argument("<name>", "the name for the new page")
-  .option("-p, --private", "create a new page in private groups", false)
-  .action(async (name: string, options: { private: boolean }) => {
+  .argument("<names...>", "the names for the new pages")
+  .option("-p, --private", "create new pages in private groups", false)
+  .action(async (names: string[], options: { private: boolean }) => {
     try {
       const pageService = new PageService();
-      await pageService.createPage(name, options.private);
-      console.log(chalk.greenBright(`Success! Created page ${name}`));
+      await pageService.createPage(names, options.private);
+      console.log(chalk.greenBright(`Success! Created pages: ${names.join(", ")}`));
     } catch (err) {
       if (err instanceof Error) {
         console.error(chalk.red(err.message));
