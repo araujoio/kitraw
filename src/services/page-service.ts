@@ -46,7 +46,9 @@ export class PageService {
 
   private publicLayoutTemplate(): string {
     return dedent`
-      export default function PublicLayout({children}: {children: React.ReactNode}) {
+      type Props = { children: React.ReactNode };
+ 
+      export default async function PublicLayout({children}: Props) {
         return (
           <>
             {children}
@@ -58,7 +60,9 @@ export class PageService {
 
   private privateLayoutTemplate(): string {
     return dedent`
-      export default function PrivateLayout({children}: {children: React.ReactNode}) {
+      type Props = { children: React.ReactNode };
+ 
+      export default async function PrivateLayout({children}: Props) {
         return (
           <>
             {children}
