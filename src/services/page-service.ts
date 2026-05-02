@@ -48,7 +48,9 @@ export class PageService {
     return dedent`
       export default function PublicLayout({children}: {children: React.ReactNode}) {
         return (
-          {children}
+          <>
+            {children}
+          </>
         );
       }
     `;
@@ -58,7 +60,9 @@ export class PageService {
     return dedent`
       export default function PrivateLayout({children}: {children: React.ReactNode}) {
         return (
-          {children}
+          <>
+            {children}
+          </>
         );
       }
     `;
