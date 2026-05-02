@@ -27,6 +27,18 @@ export class PageService {
     }
   }
 
+  async deletePage(name: string, isPrivate: boolean): Promise<void> {
+    const group: string = isPrivate ? "private" : "public";
+    const pagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, name);
+    const folderExists: boolean = await this.fileSystem.exists(pagePath);
+
+    if (folderExists) {
+      await this.fileSystem.remove(pagePath);
+    } else {
+      throw new Error(`Folder ${name} does not exist`);
+    }
+  }
+
   private pageTemplate(name: string): string {
     const capitalizedName: string = name
       .split("-")
