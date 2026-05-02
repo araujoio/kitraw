@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { init } from "@/commands/init";
 import { add } from "@/commands/add";
 import { rm } from "@/commands/rm";
+import { mv } from "./commands/mv";
 
 async function main() {
   const program = new Command();
@@ -14,7 +15,8 @@ async function main() {
   program
     .addCommand(init)
     .addCommand(add)
-    .addCommand(rm);
+    .addCommand(rm)
+    .addCommand(mv)
 
   program.parse();
 }
