@@ -66,6 +66,40 @@ export class PageService {
     await this.fileSystem.writeJson(kitrawPath, kitrawConfig);
   }
 
+  async renamePage(oldName: string, newName: string, isPrivate: boolean): Promise<void> {
+    const group: string = isPrivate ? "private" : "public";
+    const oldPagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, oldName);
+    const newPagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, newName);
+
+    const oldPageExists: boolean = await this.fileSystem.exists(oldPagePath);
+    const newPageExists: boolean = await this.fileSystem.exists(newPagePath);
+
+    if (!oldPageExists) {
+      throw new Error(`Page "${oldName}" does not exist in the ${group} group.`);
+    }
+
+    if (newPageExists) {
+      throw new Error(`Page "${newName}" already exists in the ${group} group.`);
+    }
+
+    const kitrawPath: string = path.join(process.cwd(), "kitraw.json");
+    const kitrawExists: boolean = await this.fileSystem.exists(kitrawPath);
+
+    if (!kitrawExists) {
+      throw new Error(`File ${kitrawPath} does not exist. Make sure you are in the root of a kitraw project.`);
+    }
+
+    await this.fileSystem.move(oldPagePath, newPagePath);
+
+    const kitrawConfig: any = await this.fileSystem.readJson(kitrawPath);
+
+    const routes: Array<string> = kitrawConfig["routes"][group + "Routes"];
+    const newRoutes: Array<string> = routes.filter((route: string) => route !== oldName);
+    kitrawConfig["routes"][group + "Routes"] = newRoutes;
+
+    await this.fileSystem.writeJson(kitrawPath, kitrawConfig);
+  }
+
   private pageTemplate(name: string): string {
     const capitalizedName: string = name
       .split("-")
