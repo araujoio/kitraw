@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 
 export class FileSystem {
-  constructor(private readonly fsLib = fs) {}
+  private readonly fsLib = fs;
 
   private validatePath(path: string, label: string): void {
     if (!path) {
@@ -56,12 +56,15 @@ export class FileSystem {
 
   async move(src: string, dest: string): Promise<void> {
     this.validatePath(src, "Source");
-
     this.validatePath(dest, "Destination");
+
     try {
-      await this.fsLib.move(src, dest);
-    } catch (error) {
-      throw new Error("Failed to move file:", { cause: error });
+      await this.fsLib.copy(src, dest, { overwrite: true });
+      await this.fsLib.remove(src);
+    } catch (error: any) {
+      throw new Error(
+        `Failed to move file from ${src} to ${dest}: ${error.message}`
+      );
     }
   }
 
