@@ -42,7 +42,7 @@ export class Logger {
     const timestamp = new Date().toISOString().replace("T", " ").split(".")[0];
     // Strip ANSI escape codes for the audit log
     const cleanMessage = message.replace(/\u001b\[[0-9;]*m/g, "").replace(/\u001b\]8;;.*?\u001b\\/g, "").replace(/\u001b\]8;;\u001b\\/g, "");
-    const logEntry = `${this.sessionId} ${timestamp} : ${level.toUpperCase()} ${cleanMessage}\n`;
+    const logEntry = `${this.sessionId} ${timestamp} : [${level.toUpperCase()}] > ${cleanMessage}\n`;
     fs.appendFileSync(this.auditFile, logEntry);
   }
 
