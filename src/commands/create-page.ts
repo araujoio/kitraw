@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { PageService } from "@/services/page-service";
-import chalk from "chalk";
+import { logger } from "@/services/logger-service";
 
 export const createPage = new Command("create-page")
   .name("create-page")
@@ -8,16 +8,16 @@ export const createPage = new Command("create-page")
   .argument("<names...>", "the names for the new pages")
   .option("-p, --private", "create new pages in private groups", false)
   .action(async (names: string[], options: { private: boolean }) => {
+    const pageService = new PageService();
+
+    logger.info(`enumerating pages: ${names.length}, group: ${options.private ? 'private' : 'public'}`, false);
+    
     try {
-      const pageService = new PageService();
       await pageService.createPage(names, options.private);
-      console.log(chalk.greenBright(`Success! Created pages: ${names.join(", ")}`));
+      logger.info(`resolving 100% ${names.length}/${names.length}, done`, false);
+      logger.success(`session: ${logger.getSessionID()} > look at ${logger.formatLink(logger.getAuditPath())}`);
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(chalk.red(err.message));
-      } else {
-        console.error(chalk.red("Unexpected error occurred:"), err);
-      }
+      logger.error("error creating pages", err);
       process.exit(1);
     }
   });
