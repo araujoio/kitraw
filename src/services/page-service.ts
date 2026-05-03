@@ -1,6 +1,7 @@
 import { FileSystem } from "@/lib/file-system";
 import path from "path";
 import { dedent } from "@/utils/dedent";
+import { logger } from "@/services/logger-service";
 
 export class PageService {
   private fileSystem: FileSystem = new FileSystem();
@@ -16,6 +17,7 @@ export class PageService {
       throw new Error(`File ${kitrawPath} does not exist`);
     }
 
+    let count: number = 1;
     for (const pageName of name) {
       const pagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, pageName);
       const folderExists: boolean = await this.fileSystem.exists(pagePath);
@@ -25,7 +27,10 @@ export class PageService {
       } else {
         await this.fileSystem.writeFile(path.join(pagePath, "page.tsx"), this.pageTemplate(pageName));
 
+        logger.info(`  created ${count}/${name.length} > ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, pageName, "page.tsx"))}`, false);
+
         kitrawConfig["routes"][group + "Routes"].push(pageName);
+        count++;
       }
     }
 
@@ -34,8 +39,10 @@ export class PageService {
     if (!groupLayoutExists) {
       if (group === "public") {
         await this.fileSystem.writeFile(groupLayoutPath, this.publicLayoutTemplate());
+        logger.info(`  created ${group} layout to ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, "layout.tsx"))}`, false);
       } else {
         await this.fileSystem.writeFile(groupLayoutPath, this.privateLayoutTemplate());
+        logger.info(`  created ${group} layout to ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, "layout.tsx"))}`, false);
       }
     }
   }
@@ -50,6 +57,7 @@ export class PageService {
       throw new Error(`File ${kitrawPath} does not exist`);
     }
 
+    let count: number = 1;
     for (const pageName of name) {
       const pagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, pageName);
       const folderExists: boolean = await this.fileSystem.exists(pagePath);
@@ -60,7 +68,12 @@ export class PageService {
         const routes: Array<string> = kitrawConfig["routes"][group + "Routes"];
         const newRoutes: Array<string> = routes.filter((route: string) => route !== pageName);
         kitrawConfig["routes"][group + "Routes"] = newRoutes;
+
+        logger.info(`  deleted ${count}/${name.length} > ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, pageName, "page.tsx"))}`, false);
+      } else {
+        logger.warn(`  skipped ${count}/${name.length} > ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, pageName, "page.tsx"))}`, false);
       }
+      count++;
     }
 
     await this.fileSystem.writeJson(kitrawPath, kitrawConfig);
