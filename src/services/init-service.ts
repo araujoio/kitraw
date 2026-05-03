@@ -6,15 +6,13 @@ export class InitService {
   private fileSystem: FileSystem = new FileSystem();
 
   async initializeProject(name: string): Promise<void> {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const projectPath: string = path.join(process.cwd(), name);
-    const templatePath: string = path.join(__dirname, "templates", "next-app");
-    const folderExists: boolean = await this.fileSystem.exists(projectPath);
-
-    if (folderExists) {
-      throw new Error(`Folder ${name} already exists`);
-    } else {
-      await this.fileSystem.copy(templatePath, projectPath);
+    const templatePath: string = path.join(path.dirname(fileURLToPath(import.meta.url)), "templates", "next-app");
+    
+    if (await this.fileSystem.exists(projectPath)) {
+      throw new Error(`folder ${name} already exists at: ${projectPath}`);
     }
+
+    await this.fileSystem.copy(templatePath, projectPath);
   }
 }

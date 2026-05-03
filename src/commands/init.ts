@@ -14,14 +14,11 @@ export const init = new Command("init")
 async function main(name: string) : Promise<void> {
   const initService = new InitService();
   
-  logger.info(`Initializing project: ${name}`);
-  
   try {
     await initService.initializeProject(name);
-    logger.success(`Created project: ${name}`);
-    logger.info(`Project path: ${path.join(process.cwd(), name)}`);
+    logger.info(`initialized empty next-app project in: ${path.join(process.cwd(), name)}`, false);
   } catch (err) {
-    logger.error("Initialization error", err);
+    logger.error("initialization error:", err, false);
     process.exit(1);
   }
 }
