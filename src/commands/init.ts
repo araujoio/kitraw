@@ -1,24 +1,28 @@
 import { Command } from "commander";
 import { InitService } from "@/services/init-service";
-import chalk from "chalk";
+import { logger } from "@/services/logger-service";
+import path from "path";
 
 export const init = new Command("init")
   .name("init")
   .alias("create")
   .description("initialize a new nextjs project")
   .argument("<name>", "the name for the new project.")
-  .action(async (name: string) => {
-    const initService = new InitService();
+  .action(async (name: string) => main(name)
+);
 
-    try {
-      await initService.initializeProject(name);
-      console.log((`Success! Created ${name} at: ${chalk.greenBright(process.cwd() + "/" + name)}`));
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error(chalk.red(err.message));
-      } else {
-        console.error(chalk.red("Unexpected error occurred:"), err);
-      }
-      process.exit(1);
-    }
-  });
+async function main(name: string) : Promise<void> {
+  const initService = new InitService();
+  
+  logger.info(`Initializing project: ${name}`);
+  
+  try {
+    await initService.initializeProject(name);
+    logger.success(`Created project: ${name}`);
+    logger.info(`Project path: ${path.join(process.cwd(), name)}`);
+  } catch (err) {
+    logger.error("Initialization error", err);
+    process.exit(1);
+  }
+}
+
