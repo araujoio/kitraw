@@ -15,7 +15,7 @@ export const deletePage = new Command("delete-page")
     try {
       await pageService.deletePage(names, options.private);
       logger.info(`resolving 100% ${names.length}/${names.length}, done`, false);
-      logger.success(`session: ${logger.getSessionID()} > look at ${logger.formatLink(logger.getAuditPath())}`);
+      logger.success(`session: ${logger.getSessionID()} > look at ${logger.formatLink(logger.getAuditPath())}`, false);
     } catch (err) {
       logger.error("error deleting pages", err);
       process.exit(1);
