@@ -13,7 +13,7 @@ export const createPage = new Command("create-page")
 async function main(names: Array<string>, options: { private: boolean }) : Promise<void> {
   const pageService = new PageService();
 
-  logger.info(`enumerating pages: ${names.length}, group: ${options.private ? 'private' : 'public'}`);
+  logger.info(`enumerating pages: ${names.length}, group: ${options.private ? 'private' : 'public'}`, false);
   
   try {
     await pageService.createPage(names, options.private);
