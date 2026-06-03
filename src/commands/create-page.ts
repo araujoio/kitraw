@@ -19,7 +19,7 @@ async function main(names: Array<string>, options: { private: boolean }) : Promi
     await pageService.createPage(names, options.private);
     logger.info(`resolving 100% ${names.length}/${names.length}, done`, false);
     logger.success(`session: ${logger.getSessionID()}, audit: ${logger.formatLink(logger.getAuditPath())}`, false);
-  } catch (err) {
+  } catch (err: any) {
     logger.error("unexpected error ocurred", err);
     process.exit(1);
   }
