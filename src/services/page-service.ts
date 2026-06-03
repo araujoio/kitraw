@@ -11,11 +11,12 @@ export class PageService {
     const groupLayoutPath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, "layout.tsx");
     const kitrawPath: string = path.join(process.cwd(), "kitraw.json");
     const kitrawExists: boolean = await this.fileSystem.exists(kitrawPath);
-    const kitrawConfig: any = await this.fileSystem.readJson(kitrawPath);
     
     if (!kitrawExists) {
-      throw new Error(`File ${kitrawPath} does not exist`);
+      throw new Error(`File ${kitrawPath} does not exist. Make sure you are inside the root directory of a kitraw project.`);
     }
+
+    const kitrawConfig: any = await this.fileSystem.readJson(kitrawPath);
 
     let count: number = 1;
     for (const pageName of name) {
@@ -27,7 +28,7 @@ export class PageService {
       } else {
         await this.fileSystem.writeFile(path.join(pagePath, "page.tsx"), this.pageTemplate(pageName));
 
-        logger.info(`  created ${count}/${name.length} > ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, pageName, "page.tsx"))}`, false);
+        logger.info(`  created ${count}/${name.length} > ${logger.formatLink(path.join(pageName, "page.tsx"))}`, false);
 
         kitrawConfig["routes"][group + "Routes"].push(pageName);
         count++;
@@ -39,10 +40,10 @@ export class PageService {
     if (!groupLayoutExists) {
       if (group === "public") {
         await this.fileSystem.writeFile(groupLayoutPath, this.publicLayoutTemplate());
-        logger.info(`  created ${group} layout to ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, "layout.tsx"))}`, false);
+        //logger.info(`  created ${group} layout to ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, "layout.tsx"))}`, false);
       } else {
         await this.fileSystem.writeFile(groupLayoutPath, this.privateLayoutTemplate());
-        logger.info(`  created ${group} layout to ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, "layout.tsx"))}`, false);
+        //logger.info(`  created ${group} layout to ${logger.formatLink(path.join("src", "app", "[locale]", `(${group})`, "layout.tsx"))}`, false);
       }
     }
   }
@@ -51,11 +52,12 @@ export class PageService {
     const group: string = isPrivate ? "private" : "public";
     const kitrawPath: string = path.join(process.cwd(), "kitraw.json");
     const kitrawExists: boolean = await this.fileSystem.exists(kitrawPath);
-    const kitrawConfig: any = await this.fileSystem.readJson(kitrawPath);
-
+    
     if (!kitrawExists) {
-      throw new Error(`File ${kitrawPath} does not exist`);
+      throw new Error(`File ${kitrawPath} does not exist. Make sure you are inside the root directory of a kitraw project.`);
     }
+
+    const kitrawConfig: any = await this.fileSystem.readJson(kitrawPath);
 
     let count: number = 1;
     for (const pageName of name) {
@@ -81,9 +83,15 @@ export class PageService {
 
   async renamePage(oldName: string, newName: string, isPrivate: boolean): Promise<void> {
     const group: string = isPrivate ? "private" : "public";
+    const kitrawPath: string = path.join(process.cwd(), "kitraw.json");
+    const kitrawExists: boolean = await this.fileSystem.exists(kitrawPath);
+  
+    if (!kitrawExists) {
+      throw new Error(`File ${kitrawPath} does not exist. Make sure you are inside the root directory of a kitraw project.`);
+    }
+
     const oldPagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, oldName);
     const newPagePath: string = path.join(process.cwd(), "src", "app", "[locale]", `(${group})`, newName);
-
     const oldPageExists: boolean = await this.fileSystem.exists(oldPagePath);
     const newPageExists: boolean = await this.fileSystem.exists(newPagePath);
 
@@ -93,13 +101,6 @@ export class PageService {
 
     if (newPageExists) {
       throw new Error(`Page "${newName}" already exists in the ${group} group.`);
-    }
-
-    const kitrawPath: string = path.join(process.cwd(), "kitraw.json");
-    const kitrawExists: boolean = await this.fileSystem.exists(kitrawPath);
-
-    if (!kitrawExists) {
-      throw new Error(`File ${kitrawPath} does not exist. Make sure you are in the root of a kitraw project.`);
     }
 
     await this.fileSystem.move(oldPagePath, newPagePath);
