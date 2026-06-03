@@ -20,7 +20,7 @@ async function main(names: Array<string>, options: { private: boolean }) : Promi
     logger.info(`resolving 100% ${names.length}/${names.length}, done`, false);
     logger.success(`session: ${logger.getSessionID()}, audit: ${logger.formatLink(logger.getAuditPath())}`, false);
   } catch (err) {
-    logger.error("unexpected error ocurred:", err);
+    logger.error("unexpected error ocurred", err);
     process.exit(1);
   }
 }
