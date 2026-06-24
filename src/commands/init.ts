@@ -1,8 +1,9 @@
 import { Command } from "commander";
-import { logger } from "@/utils/logger-service";
 import { fileURLToPath } from "url";
 import path from "path";
 import fsExtra from "fs-extra/esm";
+
+import { logger } from "@/utils/logger-service";
 
 export const init = new Command("init")
   .name("init")
@@ -16,17 +17,24 @@ async function main(name: string): Promise<void> {
     const rootPath: string = path.join(process.cwd(), name);
     const templatePath: string = path.join(path.dirname(fileURLToPath(import.meta.url)), "templates", "next-app");
 
-    // check if the folder already exists
     if (fsExtra.pathExistsSync(rootPath)) {
-      throw new Error(`Cannot create Kitraw project. The folder "${name}" already exists at "${rootPath}".`);
+      throw new Error(
+        `Cannot create Kitraw project. The folder "${name}" already exists at "${rootPath}".`
+      );
     }
 
     fsExtra.copySync(templatePath, rootPath);
-    
-    logger.info(`Initialized empty next-app project in: ${rootPath}`, false);
 
-  } catch (err: any) {
-    logger.error(err.message);
+    logger.info(
+      `Initialized empty next-app project in: ${rootPath}`,
+      false
+    );
+
+  } catch (err: unknown) {
+    logger.error(
+      err instanceof Error ? err.message : "An unknown error occurred."
+    );
+
     process.exit(1);
   }
 }
